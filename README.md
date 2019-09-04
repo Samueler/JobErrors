@@ -48,3 +48,52 @@ b.连续添加多个hud，并连续移除多个hud时使用移除动画。
 
 解决方案：传入对应数据类型，不进行强转，调用boolValue。
 
+**3.CLGeocoder（地址反编码）**
+问题：开启定位权限，进行定位，在代理方法`locationManager:didUpdateLocations:`中使用CLGeocoder直接进行地址反编码，编码报错`Error Domain=kCLErrorDomain Code=2 "(null)"`。
+
+	CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
+    CLGeocodeCompletionHandler handle = ^(NSArray *placemarks,NSError *error) {
+        if (error) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(locationAddressDictionary:error:)]) {
+                  [self.delegate locationAddressDictionary:nil error:error];
+                }
+            }
+            
+        for (CLPlacemark *placeMark in placemarks) {
+                NSDictionary *addressDic = placeMark.addressDictionary;
+                
+            if (self.locationAddressDictionary) {
+                self.locationAddressDictionary(addressDic, error);
+            }
+        }
+    };
+        
+    [clGeoCoder reverseGeocodeLocation:location completionHandler:handle];
+
+问题分析:查看方法`reverseGeocodeLocation: completionHandler:`方法描述时发现，该请求不能在短时间内多次请求，否则会报错。
+
+After initiating a reverse-geocoding request, do not attempt to initiate another reverse- or forward-geocoding request. Geocoding requests are rate-limited for each app, so making too many requests in a short period of time may cause some of the requests to fail. When the maximum rate is exceeded, the geocoder passes an error object with the value kCLErrorNetwork to your completion handler.
+
+解决方案：使用标记位，判断回调回来时，是否正在进行反编码，如果在反编码则不调用`reverseGeocodeLocation: completionHandler:`方法.
+
+	if (!self.isReverseGeocoding) {
+       self.isReverseGeocoding = YES;
+       CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
+       CLGeocodeCompletionHandler handle = ^(NSArray *placemarks,NSError *error) {
+       self.isReverseGeocoding = NO;
+       if (error) {
+          if (self.delegate && [self.delegate respondsToSelector:@selector(locationAddressDictionary:error:)]) {
+                [self.delegate locationAddressDictionary:nil error:error];
+          }
+       }
+            
+       for (CLPlacemark *placeMark in placemarks) {
+           NSDictionary *addressDic = placeMark.addressDictionary;
+                
+           if (self.locationAddressDictionary) {
+                self.locationAddressDictionary(addressDic, error);
+           }
+       };
+        
+    // 短时间内不能重复请求，否则会报错
+    [clGeoCoder reverseGeocodeLocation:location completionHandler:handle];
