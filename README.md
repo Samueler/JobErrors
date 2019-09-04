@@ -34,15 +34,15 @@ b.连续添加多个hud，并连续移除多个hud时使用移除动画。
 问题：Debug和Release环境下，NSNumber强转BOOL值表现不一致。
 例如：
 
-- (void)viewDidLoad {
-[super viewDidLoad];
+	- (void)viewDidLoad {
+		[super viewDidLoad];
+	
+		[self transform:@(NO)];
+	}
 
-[self transform:@(NO)];
-}
-
-- (void)transform:(BOOL)value {
-NSLog(@"%d", value);
-}
+	- (void)transform:(BOOL)value {
+		NSLog(@"%d", value);
+	}
 
 在Release情况下，value的值为YES，在Debug模式下，value的值为NO。
 
