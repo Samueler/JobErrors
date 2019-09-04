@@ -29,7 +29,7 @@ b.连续添加多个hud，并连续移除多个hud时使用移除动画。
 
 解决方案：重新计算label文本的实际宽高，并设置frame，或者使用autoLayout布局，让label自适应宽高。不使用YYLayout计算出的宽高进行赋值
 
-**2.Xcode Debug/Release**
+**3.Xcode Debug/Release**
 
 问题：Debug和Release环境下，NSNumber强转BOOL值表现不一致。
 例如：
@@ -48,7 +48,7 @@ b.连续添加多个hud，并连续移除多个hud时使用移除动画。
 
 解决方案：传入对应数据类型，不进行强转，调用boolValue。
 
-**3.CLGeocoder（地址反编码）**
+**4.CLGeocoder（地址反编码）**
 问题：开启定位权限，进行定位，在代理方法`locationManager:didUpdateLocations:`中使用CLGeocoder直接进行地址反编码，编码报错`Error Domain=kCLErrorDomain Code=2 "(null)"`。
 
 	CLGeocoder *clGeoCoder = [[CLGeocoder alloc] init];
