@@ -97,3 +97,27 @@ After initiating a reverse-geocoding request, do not attempt to initiate another
         
     // 短时间内不能重复请求，否则会报错
     [clGeoCoder reverseGeocodeLocation:location completionHandler:handle];
+    
+**5.阿里百川SDK（AlibcTradeSDK）**
+
+版本号：4.0.0.2
+问题：启动APP触发[AppMonitorTaskPool start]: attempt to start the thread again。导致启动即闪退。
+
+分析与解决方案：
+
+1.更换新的已经修改改bug的SDK。（但是，我们咨询阿里相关开发，该问题他们已经知悉，但是需要下版本进行修复，但修复时间与自己项目发布时间不一致，因此只能项目中自己避免该问题)
+
+2.咨询过阿里的同学知道这是`AppMonitorTaskPool `是继承自`NSThread`。因此可以判断出，造成闪退的原因是因为同一线程多次调用`start`方法引起。因此，可以通过hook掉`NSThread`的start方法，并添加计数器，判断调用`start`方法的次数是否大于等于1，如果大于等于1次，那么进行拦截，否则，正常调用`start`方法。在`cancel`方法中，如果计数器的值大于等于1，那么调用`cancel`方法时，将计数器减1.
+
+	- (void)mm_start{
+    	Class clsseee = NSClassFromString(@"AppMonitorTaskPool");
+    	if ([self isKindOfClass:clsseee]) {
+        	if (self.hookCount>=1) {
+            return;
+        	}
+    	}
+    	if ([self isKindOfClass:clsseee]) {
+        	self.hookCount++;
+    	}
+    	[self mm_start];
+	}
