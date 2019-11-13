@@ -101,6 +101,7 @@ After initiating a reverse-geocoding request, do not attempt to initiate another
 **5.阿里百川SDK（AlibcTradeSDK）**
 
 版本号：4.0.0.2
+
 问题：启动APP触发[AppMonitorTaskPool start]: attempt to start the thread again。导致启动即闪退。
 
 分析与解决方案：
